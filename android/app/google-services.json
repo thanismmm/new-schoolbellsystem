@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "540039261850",
+    "firebase_url": "https://schoolbell-1145-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "schoolbell-1145",
+    "storage_bucket": "schoolbell-1145.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540039261850:android:9ccdfedd33880400c9b923",
+        "android_client_info": {
+          "package_name": "com.softxpertz.school_bell_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZc24kMMnjmseB16AkERUJyri2qjkgm8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540039261850:android:6d855dc003336d22c9b923",
+        "android_client_info": {
+          "package_name": "com.softxpertz.schoolbell"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZc24kMMnjmseB16AkERUJyri2qjkgm8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
