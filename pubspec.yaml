@@ -44,6 +44,7 @@ dependencies:
   firebase_database: ^11.3.4
   connectivity_plus: ^6.1.4
   mobile_scanner: ^6.0.10
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

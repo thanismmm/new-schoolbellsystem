@@ -12,7 +12,7 @@ PreferredSizeWidget customAppBar(BuildContext context, {PreferredSizeWidget? bot
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Confirmation!'),
-        content: const Text('Are you sure, you want to go Login Page!'),
+        content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

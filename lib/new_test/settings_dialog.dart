@@ -3,8 +3,31 @@ import 'package:provider/provider.dart';
 import 'package:school_bell_system/new_test/duration_field.dart';
 import 'package:school_bell_system/new_test/schedule_provider.dart';
 
-class SettingsDialog extends StatelessWidget {
+class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
+
+  @override
+  State<SettingsDialog> createState() => _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<SettingsDialog> {
+  late TextEditingController shortController;
+  late TextEditingController longController;
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = Provider.of<ScheduleProvider>(context, listen: false);
+    shortController = TextEditingController(text: provider.shortBellDuration.toString());
+    longController = TextEditingController(text: provider.longBellDuration.toString());
+  }
+
+  @override
+  void dispose() {
+    shortController.dispose();
+    longController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +40,18 @@ class SettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildBellTypeSelector(provider),
-            _buildDurationSettings(provider),
+            DurationTextField(
+              label: 'Short Bell Duration',
+              controller: shortController,
+              min: 0,
+              max: 10,
+            ),
+            DurationTextField(
+              label: 'Long Bell Duration',
+              controller: longController,
+              min: 0,
+              max: 20,
+            ),
             _buildEmergencySwitch(provider),
             _buildBellModeSettings(provider),
             _buildAudioSettings(context, provider),
@@ -31,7 +65,12 @@ class SettingsDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            await provider.saveScheduleToFirebase(); // Save to Firebase first
+            // Validate and update provider only on save
+            final shortValue = int.tryParse(shortController.text) ?? 0;
+            final longValue = int.tryParse(longController.text) ?? 0;
+            provider.updateShortBellDuration(shortValue.clamp(0, 10));
+            provider.updateLongBellDuration(longValue.clamp(0, 20));
+            await provider.saveScheduleToFirebase();
             Navigator.pop(context);
           },
           child: const Text('Save'),
@@ -43,7 +82,7 @@ class SettingsDialog extends StatelessWidget {
   Widget _buildBellTypeSelector(ScheduleProvider provider) {
     return ListTile(
       title: const Text('Bell Type'),
-      trailing: DropdownButton<int>(
+      trailing: DropdownButton(
         value: provider.bellType,
         items: const [
           DropdownMenuItem(value: 10, child: Text("10")),
@@ -52,23 +91,6 @@ class SettingsDialog extends StatelessWidget {
         ],
         onChanged: (value) => provider.updateBellType(value!),
       ),
-    );
-  }
-
-  Widget _buildDurationSettings(ScheduleProvider provider) {
-    return Column(
-      children: [
-        DurationTextField(
-          label: 'Short Bell Duration',
-          initialValue: provider.shortBellDuration,
-          onChanged: provider.updateShortBellDuration,
-        ),
-        DurationTextField(
-          label: 'Long Bell Duration',
-          initialValue: provider.longBellDuration,
-          onChanged: provider.updateLongBellDuration,
-        ),
-      ],
     );
   }
 
@@ -104,7 +126,7 @@ class SettingsDialog extends StatelessWidget {
 
   Widget _buildModeSelector(
     String title,
-    List<int> mode,
+    List mode,
     Function(int, int) onUpdate,
   ) {
     return Column(
@@ -123,12 +145,12 @@ class SettingsDialog extends StatelessWidget {
   }
 
   Widget _buildModeDropdown(
-    List<int> mode,
+    List mode,
     int index,
     int itemCount,
     Function(int, int) onUpdate,
   ) {
-    return DropdownButton<int>(
+    return DropdownButton(
       value: mode[index],
       items: List.generate(
         itemCount,
@@ -145,30 +167,28 @@ class SettingsDialog extends StatelessWidget {
         ListTile(
           title: const Text('Regular Audio Files'),
           subtitle: Text(provider.audioList),
-          onTap:
-              () => _showEditDialog(
-                context,
-                'Regular Audio Files',
-                provider.audioList,
-                provider.updateAudioList,
-              ),
+          onTap: () => _showEditDialog(
+            context,
+            'Regular Audio Files',
+            provider.audioList,
+            provider.updateAudioList,
+          ),
         ),
         ListTile(
           title: const Text('Friday Audio Files'),
           subtitle: Text(provider.audioListF),
-          onTap:
-              () => _showEditDialog(
-                context,
-                'Friday Audio Files',
-                provider.audioListF,
-                provider.updateAudioListF,
-              ),
+          onTap: () => _showEditDialog(
+            context,
+            'Friday Audio Files',
+            provider.audioListF,
+            provider.updateAudioListF,
+          ),
         ),
       ],
     );
   }
 
-  Future<void> _showEditDialog(
+  Future _showEditDialog(
     BuildContext context,
     String title,
     String initialValue,
@@ -177,24 +197,23 @@ class SettingsDialog extends StatelessWidget {
     final controller = TextEditingController(text: initialValue);
     await showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(title),
-            content: TextField(controller: controller),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  onSave(controller.text);
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: TextField(controller: controller),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
+          TextButton(
+            onPressed: () {
+              onSave(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 }

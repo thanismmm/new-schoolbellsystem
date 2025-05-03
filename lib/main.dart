@@ -2,9 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:school_bell_system/new_test/schedule_provider.dart';
-import 'package:school_bell_system/new_test/settings_dialog.dart';
 import 'package:school_bell_system/page/new_login.dart';
-import 'package:school_bell_system/page/schedule_screen.dart';
 
 
 void main() async {
@@ -39,7 +37,7 @@ class MyApp extends StatelessWidget {
         future: Future.delayed(const Duration(seconds: 2)), // Simulate loading
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-              return SettingsDialog();
+              return LoginPage();
           }
           return const Scaffold(
             body: Center(
