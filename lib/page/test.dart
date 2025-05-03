@@ -33,7 +33,7 @@ class _SystemTabsPageState extends State<SystemTabs> with SingleTickerProviderSt
   bottom: PreferredSize(
     preferredSize: const Size.fromHeight(50.0), // Ensures proper height for TabBar
     child: Container(
-      color: Colors.white, // ✅ Set TabBar background color to white
+      color: Colors.white, //Set TabBar background color to white
       child: TabBar(
         controller: _tabController,
         tabs: const [
