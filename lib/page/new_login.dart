@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:school_bell_system/effects/slide_page_route.dart';
-import 'package:school_bell_system/page/test.dart';
+import 'package:school_bell_system/page/system_tabs.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
