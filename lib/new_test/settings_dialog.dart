@@ -162,13 +162,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
           child: Row(
             children: [
               Expanded(
-                child: _buildLabeledModeDropdown('Type', mode, 0, 2, onUpdate),
+                child: _buildLabeledModeDropdown('Ring Type ', mode, 0, 5, onUpdate),
               ),
               Expanded(
-                child: _buildLabeledModeDropdown('Count', mode, 1, 7, onUpdate),
+                child: _buildLabeledModeDropdown('Regular close', mode, 1, 7, onUpdate),
               ),
               Expanded(
-                child: _buildLabeledModeDropdown('Duration', mode, 2, 5, onUpdate),
+                child: _buildLabeledModeDropdown('Friday close', mode, 2, 5, onUpdate),
               ),
             ],
           ),
