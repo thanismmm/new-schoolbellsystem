@@ -7,7 +7,7 @@ class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
 
   @override
-  State<SettingsDialog> createState() => _SettingsDialogState();
+  State createState() => _SettingsDialogState();
 }
 
 class _SettingsDialogState extends State<SettingsDialog> {
@@ -32,7 +32,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ScheduleProvider>(context, listen: true);
-
     return AlertDialog(
       title: const Text('System Settings'),
       content: SingleChildScrollView(
@@ -107,16 +106,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
       children: [
         _buildModeSelector(
           'Morning Bell Mode',
+          'Controls the bell pattern at the start of the day',
           provider.morningBellMode,
           provider.updateMorningBellMode,
         ),
         _buildModeSelector(
           'Interval Bell Mode',
+          'Controls the bell pattern during break periods',
           provider.intervalBellMode,
           provider.updateIntervalBellMode,
         ),
         _buildModeSelector(
           'Closing Bell Mode',
+          'Controls the bell pattern at the end of the day',
           provider.closingBellMode,
           provider.updateClosingBellMode,
         ),
@@ -126,37 +128,102 @@ class _SettingsDialogState extends State<SettingsDialog> {
 
   Widget _buildModeSelector(
     String title,
+    String description,
     List mode,
     Function(int, int) onUpdate,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Row(
-          children: [
-            Expanded(child: _buildModeDropdown(mode, 0, 2, onUpdate)),
-            Expanded(child: _buildModeDropdown(mode, 1, 7, onUpdate)),
-            Expanded(child: _buildModeDropdown(mode, 2, 5, onUpdate)),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+          child: Text(
+            title, 
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            )
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+          child: Text(
+            description,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildLabeledModeDropdown('Type', mode, 0, 2, onUpdate),
+              ),
+              Expanded(
+                child: _buildLabeledModeDropdown('Count', mode, 1, 7, onUpdate),
+              ),
+              Expanded(
+                child: _buildLabeledModeDropdown('Duration', mode, 2, 5, onUpdate),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildModeDropdown(
+  Widget _buildLabeledModeDropdown(
+    String label,
     List mode,
     int index,
     int itemCount,
     Function(int, int) onUpdate,
   ) {
-    return DropdownButton(
-      value: mode[index],
-      items: List.generate(
-        itemCount,
-        (i) => DropdownMenuItem(value: i, child: Text(i.toString())),
-      ),
-      onChanged: (value) => onUpdate(index, value ?? mode[index]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.blue[700],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blue[200]!),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton(
+                isExpanded: true,
+                value: mode[index],
+                items: List.generate(
+                  itemCount,
+                  (i) => DropdownMenuItem(
+                    value: i, 
+                    child: Text(
+                      i.toString(),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+                onChanged: (value) => onUpdate(index, value ?? mode[index]),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

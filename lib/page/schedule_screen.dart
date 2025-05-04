@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:school_bell_system/new_test/datecard.dart';
 import 'package:school_bell_system/new_test/schedule_provider.dart';
 import 'package:school_bell_system/new_test/settings_dialog.dart';
 import 'package:school_bell_system/new_test/time_card.dart';
@@ -15,7 +17,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   final List<String> _scheduleTypes = [
     'Regular',
     'Friday',
-    'Exam',
+    'Exam/Special day',
     'Emergency',
   ];
   String? _selectedScheduleType = 'Regular';
@@ -31,19 +33,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     });
   }
 
-  Future<void> _selectTime(BuildContext context, int index) async {
-    final provider = Provider.of<ScheduleProvider>(context, listen: false);
-    final currentTime = provider.getCurrentTime(_selectedScheduleType!, index);
-
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: currentTime,
-    );
-
-    if (picked != null) {
-      provider.updateTime(_selectedScheduleType!, index, picked);
-    }
+  Future _selectTime(BuildContext context, int index) async {
+  final provider = Provider.of<ScheduleProvider>(context, listen: false);
+  final currentTime = provider.getCurrentTime(_selectedScheduleType!, index);
+  final picked = await showTimePicker(
+    context: context,
+    initialTime: currentTime,
+  );
+  
+  if (picked != null) {
+    provider.updateTime(_selectedScheduleType!, index, picked);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -258,12 +260,46 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           );
         },
       );
-    } else if (_selectedScheduleType == 'Exam') {
-      return Consumer<ScheduleProvider>(
-        builder: (context, provider, child) {
+    } else if (_selectedScheduleType == 'Exam/Special day') {
+  return Consumer<ScheduleProvider>(
+    builder: (context, provider, child) {
+      // Make sure we have at least 5 dates
+      while (provider.examDates.length < 5) {
+        provider.examDates.add(DateTime.now());
+      }
           return SingleChildScrollView(
             child: Column(
               children: [
+
+                Text("Week End Schedule", style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),),
+
+                  
+                //SS Day Day Selection and Schedule 
+                ...List.generate(
+              5,
+              (index) => DateCard(
+                title: 'Weekend ${index + 1} Date',
+                date: index < provider.examDates.length 
+                    ? provider.examDates[index] 
+                    : DateTime.now(),
+                onDateSelected: (date) {
+                  provider.updateExamDate(index, date);
+                },
+              ),
+            ),
+          const SizedBox(height: 10),
+            Text("Exam Schedule", style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),),
+
+                  const SizedBox(height: 10),
+
                 // 1st - Start Time
                 TimeCard(
                   title: 'Exam Start Time',

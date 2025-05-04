@@ -38,7 +38,7 @@ class _SystemTabsPageState extends State<SystemTabs> with SingleTickerProviderSt
         controller: _tabController,
         tabs: const [
           Tab(
-            icon: Icon(Icons.notifications, color: Colors.black), // Adjust icon color for visibility
+            icon: Icon(Icons.notifications, color: Colors.black),
             text: 'Bell System',
           ),
           Tab(

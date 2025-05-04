@@ -6,15 +6,18 @@ class ScheduleProvider with ChangeNotifier {
   final List<TimeOfDay> _regularTimes = List.generate(15, (_) => TimeOfDay.now());
   final List<TimeOfDay> _fridayTimes = List.generate(11, (_) => TimeOfDay.now());
   final List<TimeOfDay> _examTimes = List.generate(8, (_) => TimeOfDay.now());
+  
+  // Exam dates
+  final List<DateTime> _examDates = List.generate(5, (_) => DateTime.now());
 
   // Bell settings
   int _bellType = 10;
   int _shortBellDuration = 5;
   int _longBellDuration = 10;
   bool _emergencyRing = true;
-  List<int> _morningBellMode = [0, 6, 4];
-  List<int> _intervalBellMode = [0, 4, 3];
-  List<int> _closingBellMode = [0, 5, 2];
+  List _morningBellMode = [0, 6, 4];
+  List _intervalBellMode = [0, 4, 3];
+  List _closingBellMode = [0, 5, 2];
   bool _isUpdating = false;
 
   // Audio files
@@ -25,13 +28,14 @@ class ScheduleProvider with ChangeNotifier {
   List<TimeOfDay> get regularTimes => _regularTimes;
   List<TimeOfDay> get fridayTimes => _fridayTimes;
   List<TimeOfDay> get examTimes => _examTimes;
+  List<DateTime> get examDates => _examDates;
   int get bellType => _bellType;
   int get shortBellDuration => _shortBellDuration;
   int get longBellDuration => _longBellDuration;
   bool get emergencyRing => _emergencyRing;
-  List<int> get morningBellMode => _morningBellMode;
-  List<int> get intervalBellMode => _intervalBellMode;
-  List<int> get closingBellMode => _closingBellMode;
+  List get morningBellMode => _morningBellMode;
+  List get intervalBellMode => _intervalBellMode;
+  List get closingBellMode => _closingBellMode;
   String get audioList => _audioList;
   String get audioListF => _audioListF;
   bool get isUpdating => _isUpdating;
@@ -42,7 +46,7 @@ class ScheduleProvider with ChangeNotifier {
         return _regularTimes[index];
       case 'Friday':
         return _fridayTimes[index];
-      case 'Exam':
+      case 'Exam/Special day':
         return _examTimes[index];
       default:
         return TimeOfDay.now();
@@ -55,7 +59,7 @@ class ScheduleProvider with ChangeNotifier {
         return _regularTimes.length;
       case 'Friday':
         return _fridayTimes.length;
-      case 'Exam':
+      case 'Exam/Special day':
         return _examTimes.length;
       default:
         return 0;
@@ -66,11 +70,11 @@ class ScheduleProvider with ChangeNotifier {
     try {
       final snapshot = await FirebaseDatabase.instance.ref().get();
       if (snapshot.exists) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        
+        final data = snapshot.value as Map;
         _updateTimes(data);
         _updateBellSettings(data);
         _updateAudioFiles(data);
+        _updateExamDates(data);
         notifyListeners();
       }
     } catch (e) {
@@ -86,11 +90,18 @@ class ScheduleProvider with ChangeNotifier {
       case 'Friday':
         _fridayTimes[index] = time;
         break;
-      case 'Exam':
+      case 'Exam/Special day':
         _examTimes[index] = time;
         break;
     }
     notifyListeners();
+  }
+  
+  void updateExamDate(int index, DateTime date) {
+    if (index >= 0 && index < _examDates.length) {
+      _examDates[index] = date;
+      notifyListeners();
+    }
   }
 
   void updateBellType(int value) {
@@ -141,11 +152,13 @@ class ScheduleProvider with ChangeNotifier {
   Future<void> saveScheduleToFirebase() async {
     _isUpdating = true;
     notifyListeners();
-     try {
+    
+    try {
       final updates = {
         'R_Time': _regularTimes.map(_formatDatabaseTime).join(','),
         'F_Time': _fridayTimes.map(_formatDatabaseTime).join(','),
         'E_Time': _examTimes.map(_formatDatabaseTime).join(','),
+        'SS_Date': _formatDatabaseDates(),
         'Bell_Type': _bellType,
         'S_Bell_Dur': _shortBellDuration,
         'L_Bell_Dur': _longBellDuration,
@@ -160,7 +173,7 @@ class ScheduleProvider with ChangeNotifier {
         'Status': {'value': 1},
         'count': 5,
       };
-
+      
       await FirebaseDatabase.instance.ref().update(updates);
     } catch (e) {
       debugPrint('Error saving schedule: $e');
@@ -171,7 +184,7 @@ class ScheduleProvider with ChangeNotifier {
     }
   }
 
-  void _updateTimes(Map<dynamic, dynamic> data) {
+  void _updateTimes(Map data) {
     _updateTimeList(data['R_Time'], _regularTimes);
     _updateTimeList(data['F_Time'], _fridayTimes);
     _updateTimeList(data['E_Time'], _examTimes);
@@ -186,18 +199,17 @@ class ScheduleProvider with ChangeNotifier {
     }
   }
 
-  void _updateBellSettings(Map<dynamic, dynamic> data) {
-    _bellType = data['Bell_Type'] ?? '10';
-    _shortBellDuration =(data['S_Bell_Dur']?? '5') ?? 5;
-    _longBellDuration = (data['L_Bell_Dur'] ?? '15') ?? 15;
+  void _updateBellSettings(Map data) {
+    _bellType = data['Bell_Type'] ?? 10;
+    _shortBellDuration = data['S_Bell_Dur'] ?? 5;
+    _longBellDuration = data['L_Bell_Dur'] ?? 15;
     _emergencyRing = data['Emergency_Ring'] == 1;
-    
     _updateBellMode(data['Mor_Bell_Mode'], _morningBellMode);
     _updateBellMode(data['Int_Bell_Mode'], _intervalBellMode);
     _updateBellMode(data['Clo_Bell_Mode'], _closingBellMode);
   }
 
-  void _updateBellMode(String? modeString, List<int> modeList) {
+  void _updateBellMode(String? modeString, List modeList) {
     if (modeString != null) {
       final modes = modeString.split(',').map((e) => int.tryParse(e) ?? 0).toList();
       for (int i = 0; i < modes.length && i < modeList.length; i++) {
@@ -206,9 +218,47 @@ class ScheduleProvider with ChangeNotifier {
     }
   }
 
-  void _updateAudioFiles(Map<dynamic, dynamic> data) {
+  void _updateAudioFiles(Map data) {
     _audioList = data['Audio_List'] ?? 'Mor_Str.mp3,Mor_End.mp3,Sub_1.mp3,Sub_2.mp3,Interval.mp3';
     _audioListF = data['Audio_List_F'] ?? 'aa.mp3';
+  }
+  
+  void _updateExamDates(Map data) {
+    if (data['SS_Date'] != null) {
+      final datesString = data['SS_Date'] as String;
+      final dates = _parseDatabaseDates(datesString);
+      
+      // Update exam dates list
+      for (int i = 0; i < dates.length && i < _examDates.length; i++) {
+        _examDates[i] = dates[i];
+      }
+    }
+  }
+  
+  List<DateTime> _parseDatabaseDates(String datesString) {
+    final datesList = <DateTime>[];
+    final dates = datesString.split(',');
+    
+    for (final dateStr in dates) {
+      if (dateStr.length == 8) {
+        try {
+          final day = int.parse(dateStr.substring(0, 2));
+          final month = int.parse(dateStr.substring(2, 4));
+          final year = int.parse(dateStr.substring(4));
+          datesList.add(DateTime(year, month, day));
+        } catch (e) {
+          debugPrint('Error parsing date: $dateStr - $e');
+        }
+      }
+    }
+    
+    return datesList;
+  }
+  
+  String _formatDatabaseDates() {
+    return _examDates.map((date) => 
+      '${date.day.toString().padLeft(2, '0')}${date.month.toString().padLeft(2, '0')}${date.year}'
+    ).join(',');
   }
 
   TimeOfDay _parseDatabaseTime(String timeStr) {
