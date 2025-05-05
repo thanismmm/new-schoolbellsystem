@@ -18,6 +18,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
   void initState() {
     super.initState();
     final provider = Provider.of<ScheduleProvider>(context, listen: false);
+    // Convert old bell type values to new ones
+  if (provider.bellType == 10) {
+    provider.updateBellType(1);
+  } else if (provider.bellType == 20) {
+    provider.updateBellType(2);
+  } else if (provider.bellType == 30) {
+    provider.updateBellType(3);
+  }
     shortController = TextEditingController(text: provider.shortBellDuration.toString());
     longController = TextEditingController(text: provider.longBellDuration.toString());
   }
@@ -84,9 +92,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
       trailing: DropdownButton(
         value: provider.bellType,
         items: const [
-          DropdownMenuItem(value: 10, child: Text("10")),
-          DropdownMenuItem(value: 20, child: Text('20')),
-          DropdownMenuItem(value: 30, child: Text('30')),
+          DropdownMenuItem(value: 1, child: Text("1")),
+          DropdownMenuItem(value: 2, child: Text('2')),
+          DropdownMenuItem(value: 3, child: Text('3')),
         ],
         onChanged: (value) => provider.updateBellType(value!),
       ),

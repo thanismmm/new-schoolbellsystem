@@ -11,7 +11,7 @@ class ScheduleProvider with ChangeNotifier {
   final List<DateTime> _examDates = List.generate(5, (_) => DateTime.now());
 
   // Bell settings
-  int _bellType = 10;
+  int _bellType = 1;
   int _shortBellDuration = 5;
   int _longBellDuration = 10;
   bool _emergencyRing = true;
@@ -168,7 +168,6 @@ class ScheduleProvider with ChangeNotifier {
         'Clo_Bell_Mode': _closingBellMode.join(','),
         'Audio_List': _audioList,
         'Audio_List_F': _audioListF,
-        'Updated_Time': DateTime.now().millisecondsSinceEpoch ~/ 1000,
         'Update': 1,
         'Status': {'value': 1},
         'count': 5,
@@ -200,7 +199,7 @@ class ScheduleProvider with ChangeNotifier {
   }
 
   void _updateBellSettings(Map data) {
-    _bellType = data['Bell_Type'] ?? 10;
+    _bellType = data['Bell_Type'] ?? 1;
     _shortBellDuration = data['S_Bell_Dur'] ?? 5;
     _longBellDuration = data['L_Bell_Dur'] ?? 15;
     _emergencyRing = data['Emergency_Ring'] == 1;
