@@ -139,7 +139,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
     String description,
     List mode,
     Function(int, int) onUpdate,
-  ) {
+  ) 
+  {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -166,71 +167,96 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
         Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: [
-            SizedBox(width: 80, child: _buildLabeledModeDropdown('Ring Type', mode, 0, 5, onUpdate)),
-            SizedBox(width: 80, child: _buildLabeledModeDropdown('Regular close', mode, 1, 7, onUpdate)),
-            SizedBox(width: 80, child: _buildLabeledModeDropdown('Friday close', mode, 2, 5, onUpdate)),
-            SizedBox(width: 80, child: _buildLabeledModeDropdown('Special', mode, 3, 5, onUpdate)),
-          ],
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: [
+              SizedBox(width: 120, child: _buildLabeledModeDropdown('Ring Type', mode, 0, 5, onUpdate)),
+              SizedBox(width: 72, child: _buildLabeledModeDropdown('Regular', mode, 1, 15, onUpdate)),
+              SizedBox(width: 75, child: _buildLabeledModeDropdown('Friday', mode, 2, 15, onUpdate)),
+              SizedBox(width: 75, child: _buildLabeledModeDropdown('Special', mode, 3, 15, onUpdate)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getBellModeLabel(int index) {
+    switch (index) {
+      case 0: return "short once";
+      case 1: return "short twice";
+      case 2: return "long once";
+      case 3: return "long twice";
+      case 4: return "short_long";
+      default: return index.toString();
+    }
+  }
+
+
+
+Widget _buildLabeledModeDropdown(
+  String label,
+  List mode,
+  int index,
+  int itemCount,
+  Function(int, int) onUpdate,
+) {
+  // Ensure the current value is within the valid range
+  if (mode[index] >= itemCount) {
+    // If the current value is out of range, update it to a valid value
+    // This will happen immediately when the widget builds
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      onUpdate(index, 0); // Reset to first option
+    });
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.blue[700],
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      Container(
+        width: label == 'Ring Type' ? 120 : 72,
+        margin: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue[200]!),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: ButtonTheme(
+            alignedDropdown: true,
+            child: DropdownButton(
+              isExpanded: true,
+              // Use a valid value for the dropdown
+              value: mode[index] < itemCount ? mode[index] : 0,
+              items: List.generate(
+                itemCount,
+                (i) => DropdownMenuItem(
+                  value: i,
+                  child: Text(
+                    label == 'Ring Type' ? _getBellModeLabel(i) : i.toString(),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
+              onChanged: (value) => onUpdate(index, value ?? mode[index]),
+            ),
+          ),
         ),
       ),
     ],
   );
 }
 
-  Widget _buildLabeledModeDropdown(
-    String label,
-    List mode,
-    int index,
-    int itemCount,
-    Function(int, int) onUpdate,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.blue[700],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Container(
-          width: 72,
-          margin: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue[200]!),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: ButtonTheme(
-              alignedDropdown: true,
-              child: DropdownButton(
-                isExpanded: true,
-                value: mode[index],
-                items: List.generate(
-                  itemCount,
-                  (i) => DropdownMenuItem(
-                    value: i, 
-                    child: Text(
-                      i.toString(),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ),
-                onChanged: (value) => onUpdate(index, value ?? mode[index]),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildAudioSettings(BuildContext context, ScheduleProvider provider) {
     return Column(
