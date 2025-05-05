@@ -15,9 +15,9 @@ class ScheduleProvider with ChangeNotifier {
   int _shortBellDuration = 5;
   int _longBellDuration = 10;
   bool _emergencyRing = true;
-  List _morningBellMode = [0, 6, 4];
-  List _intervalBellMode = [0, 4, 3];
-  List _closingBellMode = [0, 5, 2];
+  List _morningBellMode = [0, 6, 4, 0];
+  List _intervalBellMode = [0, 4, 3, 0];
+  List _closingBellMode = [0, 5, 2, 0];
   bool _isUpdating = false;
 
   // Audio files

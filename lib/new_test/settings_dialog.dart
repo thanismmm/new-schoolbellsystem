@@ -158,24 +158,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildLabeledModeDropdown('Ring Type ', mode, 0, 5, onUpdate),
-              ),
-              Expanded(
-                child: _buildLabeledModeDropdown('Regular close', mode, 1, 7, onUpdate),
-              ),
-              Expanded(
-                child: _buildLabeledModeDropdown('Friday close', mode, 2, 5, onUpdate),
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Wrap(
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: [
+            SizedBox(width: 80, child: _buildLabeledModeDropdown('Ring Type', mode, 0, 5, onUpdate)),
+            SizedBox(width: 80, child: _buildLabeledModeDropdown('Regular close', mode, 1, 7, onUpdate)),
+            SizedBox(width: 80, child: _buildLabeledModeDropdown('Friday close', mode, 2, 5, onUpdate)),
+            SizedBox(width: 80, child: _buildLabeledModeDropdown('Special', mode, 3, 5, onUpdate)),
+          ],
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   Widget _buildLabeledModeDropdown(
     String label,
@@ -196,7 +193,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ),
         Container(
-          width: double.infinity,
+          width: 72,
           margin: const EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.blue[200]!),
